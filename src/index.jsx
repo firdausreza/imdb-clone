@@ -3,11 +3,14 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import Home from "./routes/home/Home.jsx";
-import "./assets/css/index.css";
-import "animate.css";
 import Root from "./routes/Root.jsx";
 import Watchlists from "./routes/watchlists/Watchlists.jsx";
-import MovieDetail from "./routes/movie-detail/Detail.jsx";
+import MovieDetail, {
+	loader as movieLoader,
+} from "./routes/movie-detail/Detail.jsx";
+
+import "./assets/css/index.css";
+import "animate.css";
 
 const router = createBrowserRouter([
 	{
@@ -23,8 +26,9 @@ const router = createBrowserRouter([
 				element: <Watchlists />,
 			},
 			{
-				path: "movies/:movieName",
+				path: "movies/:movieId",
 				element: <MovieDetail />,
+				loader: movieLoader,
 			},
 		],
 	},

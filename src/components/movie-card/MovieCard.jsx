@@ -1,23 +1,36 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Image from "../../assets/img/movie.jpg";
+import numeral from "numeral";
+
 import ButtonLogo from "../button/ButtonLogo.jsx";
 
-function MovieCard({ showBtn }) {
+function MovieCard({
+	id,
+	title,
+	year,
+	genres,
+	rating,
+	totalRate,
+	poster,
+	showBtn,
+}) {
+	const _year = new Date(year).getFullYear();
+
 	return (
 		<div className="rounded-md flex items-start bg-white border shadow-md">
 			<img
-				src={Image}
-				alt="movie poster"
-				className="w-[33%] h-full rounded-tl-md rounded-bl-md object-cover object-center bg-clip-border"
+				src={`https://image.tmdb.org/t/p/original/${poster}`}
+				alt={title}
+				className="w-[39%] h-full rounded-tl-md rounded-bl-md object-cover object-center bg-clip-border"
 			/>
-			<div className="w-[66%] h-full flex flex-col p-4 justify-start">
-				<Link to={"movies/movie-name"}>
-					<h3 className="text-lg font-semibold">Movie Name</h3>
+			<div className="w-[61%] h-full flex flex-col p-4 justify-start">
+				<Link to={`movies/${id}`}>
+					<h3 className="text-lg font-semibold leading-tight">
+						{title}
+					</h3>
 				</Link>
-				<p className="text-sm text-stone-500 mt-2">
-					2005 - 160min - Genre
-				</p>
+				<p className="text-sm text-stone-500 mt-2">Release: {_year}</p>
+				<p className="text-sm text-stone-500 mt-2">Genres: {genres}</p>
 				<p className="text-sm text-stone-500 mt-2">
 					<span className="flex items-center gap-1">
 						<svg
@@ -35,7 +48,10 @@ function MovieCard({ showBtn }) {
 							<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 							<path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
 						</svg>
-						8.2 (91K)
+						{numeral(rating).format("0.[0]")}
+						<span className="uppercase">
+							({numeral(totalRate).format("0a")})
+						</span>
 					</span>
 				</p>
 				{showBtn && (

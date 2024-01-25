@@ -6,7 +6,7 @@ function MovieBadge({ title, value, logo }) {
 			<div className="w-[33%]">{logo}</div>
 			<div className="flex-1 ms-4">
 				<h5 className="text-base font-medium text-nowrap">{title}</h5>
-				<p className="text-xl font-bold">{value}</p>
+				<p className="text-xl font-bold uppercase">{value}</p>
 			</div>
 		</div>
 	);
