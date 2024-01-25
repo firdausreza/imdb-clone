@@ -1,21 +1,32 @@
 import React, { useEffect, useState } from "react";
-import Image from "../../assets/img/movie.jpg";
+import { useLoaderData } from "react-router-dom";
 import MovieBadge from "../../components/badge/MovieBadge.jsx";
 import ButtonLogo from "../../components/button/ButtonLogo.jsx";
 import Button from "../../components/button/Button.jsx";
+import { tmdb } from "../../helpers/tmdb-api.js";
+import moment from "moment";
+import numeral from "numeral";
+
+export async function loader({ params }) {
+	const { data } = await tmdb.getMovieDetail(params.movieId);
+	return data;
+}
 
 function MovieDetail() {
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+	const movie = useLoaderData();
 
 	useEffect(() => {
 		window.addEventListener("resize", () => {
 			setWindowWidth(window.innerWidth);
 		});
 
+		console.log(movie);
+
 		return () => {
 			window.removeEventListener("resize", () => {});
 		};
-	}, []);
+	}, [movie]);
 
 	// Comment component
 	const comments = () => {
@@ -44,7 +55,7 @@ function MovieDetail() {
 						<h5 className="text-lg font-medium text-nowrap">
 							Anonymous User
 						</h5>
-						<p className="text-sm text-stone-600">25-01-2024</p>
+						<p className="text-sm ">25-01-2024</p>
 						<p className="text-base font-medium mt-1">
 							Lorem, ipsum dolor sit amet consectetur adipisicing
 							elit. Cumque accusamus nisi expedita qui neque
@@ -66,40 +77,61 @@ function MovieDetail() {
 		return (
 			<>
 				<section id="movie-title" className="w-full px-4">
-					<h1 className="text-2xl font-bold">Movie Name</h1>
+					<h1 className="text-2xl font-bold">{movie.title}</h1>
 				</section>
 				<section
 					id="main-info"
 					className="w-full flex items-start px-4 mt-2"
 				>
 					<img
-						src={Image}
+						src={`https://image.tmdb.org/t/p/original/${movie.poster_path}`}
 						alt="movie poster"
 						className={`${defineImgWidth()} object-contain`}
 					/>
 					<article className="flex-1 flex flex-col justify-start ms-4">
-						<h2 className="font-medium">
-							Tagline-1, Tagline-2, Tagline-3
-						</h2>
+						<h2 className="font-medium">{movie.tagline}</h2>
 						<div className="mt-1">
-							<p className="text-stone-600 font-medium">
-								Genre: Drama, Action
+							<p className=" font-medium">
+								<span className="text-amber-500 font-bold">
+									Genre:{" "}
+								</span>
+								{movie.genres.map((gen) => gen.name).join(", ")}
 							</p>
-							<p className="text-stone-600 mt-2 font-medium">
-								Status: Released
+							<p className="mt-2 font-medium">
+								<span className="text-amber-500 font-bold">
+									Status:{" "}
+								</span>
+								{movie.status}
 							</p>
-							<p className="text-stone-600 mt-2 font-medium">
-								Release Date: 15 January 2005
+							<p className="mt-2 font-medium">
+								<span className="text-amber-500 font-bold">
+									Release Date:{" "}
+								</span>
+								{moment(movie.release_date).format(
+									"DD MMM YYYY"
+								)}
 							</p>
-							<p className="text-stone-600 mt-2 font-medium">
-								Language: English
+							<p className="mt-2 font-medium">
+								<span className="text-amber-500 font-bold">
+									Languages:{" "}
+								</span>
+								{movie.spoken_languages
+									.map((lang) => lang.english_name)
+									.join(", ")}
 							</p>
-							<p className="text-stone-600 mt-2 font-medium">
-								Productions: 21 Fox Centuries, Dreamworks, The
-								Linson Company
+							<p className="mt-2 font-medium">
+								<span className="text-amber-500 font-bold">
+									Productions:{" "}
+								</span>
+								{movie.production_companies
+									.map((company) => company.name)
+									.join(", ")}
 							</p>
-							<p className="text-stone-600 mt-2 font-medium">
-								Production Origin: United States of America
+							<p className="mt-2 font-medium">
+								<span className="text-amber-500 font-bold">
+									Production Origin:{" "}
+								</span>
+								{movie.production_countries[0].name}
 							</p>
 						</div>
 						<div className="flex flex-wrap items-center gap-2 mt-2">
@@ -160,14 +192,14 @@ function MovieDetail() {
 				</section>
 				<section id="other-info" className="w-full mt-4 px-4">
 					<p className="font-medium">
-						Lorem ipsum dolor sit amet consectetur adipisicing elit.
-						Repudiandae in earum aspernatur dicta, ratione quaerat
-						facilis esse blanditiis quasi excepturi.
+						Synopsis:
+						<br />
+						{movie.overview}
 					</p>
 					<div className="w-full flex flex-wrap items-center gap-2 mt-4">
 						<MovieBadge
 							title="Popularity"
-							value="128K"
+							value={numeral(movie.popularity).format("0.0a")}
 							logo={
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -193,7 +225,7 @@ function MovieDetail() {
 						/>
 						<MovieBadge
 							title="Ratings"
-							value="8.2"
+							value={numeral(movie.vote_average).format("0.[0]")}
 							logo={
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -219,7 +251,7 @@ function MovieDetail() {
 						/>
 						<MovieBadge
 							title="Total Ratings"
-							value="180K"
+							value={numeral(movie.vote_count).format("0.0a")}
 							logo={
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -274,38 +306,60 @@ function MovieDetail() {
 		return (
 			<section id="main-info" className="w-full flex items-start">
 				<img
-					src={Image}
+					src={`https://image.tmdb.org/t/p/original/${movie.poster_path}`}
 					alt="movie poster"
 					className="w-[33%] object-contain"
 				/>
 				<article className="w-[66%] flex flex-col justify-start px-8">
-					<h1 className="text-4xl font-bold">Movie Name</h1>
+					<h1 className="text-4xl font-bold">{movie.title}</h1>
 					<h2 className="text-lg font-medium mt-2">
-						Tagline-1, Tagline-2, Tagline-3
+						{movie.tagline}
 					</h2>
 					<p className="mt-4 font-medium">
-						Lorem ipsum dolor sit amet consectetur adipisicing elit.
-						Impedit fuga inventore molestias illo, molestiae harum.
+						Synopsis:
+						<br />
+						{movie.overview}
 					</p>
 					<div className="mt-4">
-						<p className="text-stone-600 font-medium">
-							Genre: Drama, Action
+						<p className=" font-medium">
+							<span className="text-amber-500 font-bold">
+								Genres:{" "}
+							</span>
+							{movie.genres.map((gen) => gen.name).join(", ")}
 						</p>
-						<p className="text-stone-600 mt-2 font-medium">
-							Status: Released
+						<p className="mt-2 font-medium">
+							<span className="text-amber-500 font-bold">
+								Status:{" "}
+							</span>{" "}
+							{movie.status}
 						</p>
-						<p className="text-stone-600 mt-2 font-medium">
-							Release Date: 15 January 2005
+						<p className="mt-2 font-medium">
+							<span className="text-amber-500 font-bold">
+								Release Date:{" "}
+							</span>
+							{moment(movie.release_date).format("DD MMM YYYY")}
 						</p>
-						<p className="text-stone-600 mt-2 font-medium">
-							Language: English
+						<p className="mt-2 font-medium">
+							<span className="text-amber-500 font-bold">
+								Languages:{" "}
+							</span>
+							{movie.spoken_languages
+								.map((lang) => lang.english_name)
+								.join(", ")}
 						</p>
-						<p className="text-stone-600 mt-2 font-medium">
-							Productions: 21 Fox Centuries, Dreamworks, The
-							Linson Company
+						<p className="mt-2 font-medium">
+							<span className="text-amber-500 font-bold">
+								Productions:{" "}
+							</span>
+							{movie.production_companies
+								.map((company) => company.name)
+								.join(", ")}
 						</p>
-						<p className="text-stone-600 mt-2 font-medium">
-							Production Origin: United States of America
+						<p className="mt-2 font-medium">
+							<span className="text-amber-500 font-bold">
+								Production Origin:{" "}
+							</span>
+							{movie.production_countries[0].name}
 						</p>
 					</div>
 					<div className="flex items-center mt-4">
@@ -365,7 +419,7 @@ function MovieDetail() {
 					<div className="flex flex-wrap items-center gap-2 mt-4">
 						<MovieBadge
 							title="Popularity"
-							value="128K"
+							value={numeral(movie.popularity).format("0,0")}
 							logo={
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -391,7 +445,7 @@ function MovieDetail() {
 						/>
 						<MovieBadge
 							title="Ratings"
-							value="8.2"
+							value={numeral(movie.vote_average).format("0.[0]")}
 							logo={
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -420,7 +474,7 @@ function MovieDetail() {
 						/>
 						<MovieBadge
 							title="Total Ratings"
-							value="180K"
+							value={numeral(movie.vote_count).format("0,0")}
 							logo={
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
