@@ -1,7 +1,28 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useLoaderData } from "react-router-dom";
+
 import MovieCard from "../../components/movie-card/MovieCard.jsx";
 import { tmdb } from "../../helpers/tmdb-api.js";
 import { mapWithGenres } from "../../helpers/movies.js";
+
+export async function loader({ request }) {
+	const url = new URL(request.url);
+	const requestToken = url.searchParams.get("request_token");
+	const isApproved = url.searchParams.get("approved");
+	let authData = {
+		status: "unauthenticated",
+		request_token: "",
+		approved: false,
+	};
+
+	if (requestToken && isApproved) {
+		authData.status = "authenticated";
+		authData.request_token = requestToken;
+		authData.approved = true;
+	}
+
+	return authData;
+}
 
 function Home() {
 	const [nowPlayingMovies, setNpMovies] = useState();
@@ -9,10 +30,10 @@ function Home() {
 	const [topRatedMovies, setTopMovies] = useState();
 	const [upcomingMovies, setUpcomingMovies] = useState();
 	const [genres, setGenres] = useState();
+	const authData = useLoaderData();
 
 	const getGenres = async () => {
 		const { data } = await tmdb.getGenres();
-		console.log(data);
 
 		if (!data) {
 			setGenres(null);
@@ -76,6 +97,27 @@ function Home() {
 	}, [upcomingMovies, genres]);
 
 	useEffect(() => {
+		if (!sessionStorage.getItem("currentSession")) {
+			if (
+				authData.status === "authenticated" &&
+				authData.request_token !== "" &&
+				authData.approved
+			) {
+				sessionStorage.setItem("authStatus", JSON.stringify(authData));
+				tmdb.createSession(authData.request_token)
+					.then((res) => {
+						if (res.data)
+							sessionStorage.setItem(
+								"currentSession",
+								res.data.session_id
+							);
+					})
+					.catch((e) => {
+						throw new Error("Failed to createSession: ", e);
+					});
+			}
+		}
+
 		if (!genres) getGenres();
 		if (genres) {
 			getMovies("now_playing");
@@ -83,7 +125,7 @@ function Home() {
 			getMovies("top_rated");
 			getMovies("upcoming");
 		}
-	}, [genres]);
+	}, [genres, authData]);
 
 	return (
 		<>

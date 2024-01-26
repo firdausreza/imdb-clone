@@ -21,8 +21,6 @@ function MovieDetail() {
 			setWindowWidth(window.innerWidth);
 		});
 
-		console.log(movie);
-
 		return () => {
 			window.removeEventListener("resize", () => {});
 		};

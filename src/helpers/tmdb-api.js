@@ -35,4 +35,45 @@ export const tmdb = {
 			},
 		});
 	},
+	createReqToken: () => {
+		return axios.get(
+			"https://api.themoviedb.org/3/authentication/token/new",
+			{
+				headers: {
+					Accept: "application/json",
+				},
+				params: {
+					api_key: process.env.REACT_APP_TMDB_KEY,
+				},
+			}
+		);
+	},
+	createSession: (reqToken) => {
+		return axios.get(
+			"https://api.themoviedb.org/3/authentication/session/new",
+			{
+				headers: {
+					"Content-Type": "application/json",
+				},
+				params: {
+					api_key: process.env.REACT_APP_TMDB_KEY,
+					request_token: reqToken,
+				},
+			}
+		);
+	},
+	deleteSession: (sessionId) => {
+		return axios.delete(
+			"https://api.themoviedb.org/3/authentication/session",
+			{
+				headers: {
+					"Content-Type": "application/json",
+				},
+				params: {
+					api_key: process.env.REACT_APP_TMDB_KEY,
+					session_id: sessionId,
+				},
+			}
+		);
+	},
 };
