@@ -106,11 +106,32 @@ function Home() {
 				sessionStorage.setItem("authStatus", JSON.stringify(authData));
 				tmdb.createSession(authData.request_token)
 					.then((res) => {
-						if (res.data)
+						if (res.data) {
 							sessionStorage.setItem(
 								"currentSession",
 								res.data.session_id
 							);
+							tmdb.getAccountDetails(res.data.session_id)
+								.then((_res) => {
+									if (res.data) {
+										sessionStorage.setItem(
+											"currentUser",
+											JSON.stringify({
+												name: _res.data.name,
+												username: _res.data.username,
+												id: _res.data.id,
+											})
+										);
+									}
+								})
+								.then(() => window.location.reload())
+								.catch((e) => {
+									throw new Error(
+										"Failed to get account details: ",
+										e
+									);
+								});
+						}
 					})
 					.catch((e) => {
 						throw new Error("Failed to createSession: ", e);

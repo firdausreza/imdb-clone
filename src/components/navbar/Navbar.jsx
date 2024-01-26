@@ -26,6 +26,7 @@ function Navbar() {
 				.then(() => {
 					sessionStorage.removeItem("authStatus");
 					sessionStorage.removeItem("currentSession");
+					sessionStorage.removeItem("currentUser");
 					window.location.href = "/";
 				})
 				.catch((e) => {

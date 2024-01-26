@@ -76,4 +76,15 @@ export const tmdb = {
 			}
 		);
 	},
+	getAccountDetails: (sessionId) => {
+		return axios.get("https://api.themoviedb.org/3/account", {
+			headers: {
+				"Content-Type": "application/json",
+			},
+			params: {
+				api_key: process.env.REACT_APP_TMDB_KEY,
+				session_id: sessionId,
+			},
+		});
+	},
 };
