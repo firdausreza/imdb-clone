@@ -3,7 +3,7 @@ import { useLoaderData } from "react-router-dom";
 
 import MovieCard from "../../components/movie-card/MovieCard.jsx";
 import { tmdb } from "../../helpers/tmdb-api.js";
-import { mapWithGenres } from "../../helpers/movies.js";
+import { mapWithGenres, mapWithWatchlist } from "../../helpers/movies.js";
 
 export async function loader({ request }) {
 	const url = new URL(request.url);
@@ -24,12 +24,253 @@ export async function loader({ request }) {
 	return authData;
 }
 
+const RenderNowPlayingMovies = ({
+	movieCollection,
+	reloadWatchlist,
+	isSectionLoading,
+}) => {
+	return (
+		<>
+			<h2 id="np-heading" className="text-2xl sm:text-4xl font-bold">
+				Now Playing
+			</h2>
+			{isSectionLoading && (
+				<div className="h-[200px] flex justify-center items-center">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						className="icon icon-tabler icon-tabler-loader animate-spin"
+						width={32}
+						height={32}
+						viewBox="0 0 24 24"
+						strokeWidth={2}
+						stroke="#000"
+						fill="none"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
+						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+						<path d="M12 6l0 -3" />
+						<path d="M16.25 7.75l2.15 -2.15" />
+						<path d="M18 12l3 0" />
+						<path d="M16.25 16.25l2.15 2.15" />
+						<path d="M12 18l0 3" />
+						<path d="M7.75 16.25l-2.15 2.15" />
+						<path d="M6 12l-3 0" />
+						<path d="M7.75 7.75l-2.15 -2.15" />
+					</svg>
+				</div>
+			)}
+			{!isSectionLoading && movieCollection && (
+				<article className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+					{movieCollection.map((movie) => {
+						return (
+							<MovieCard
+								movie={movie}
+								key={movie.id}
+								reloadWatchlist={() => reloadWatchlist()}
+							/>
+						);
+					})}
+				</article>
+			)}
+			{!isSectionLoading && !movieCollection && (
+				<div className="h-[150px] flex justify-center items-center">
+					<p className="text-center">No data yet.</p>
+				</div>
+			)}
+		</>
+	);
+};
+
+const RenderPopularMovies = ({
+	movieCollection,
+	reloadWatchlist,
+	isSectionLoading,
+}) => {
+	return (
+		<>
+			<h2 id="popular-heading" className="text-2xl sm:text-4xl font-bold">
+				Popular Movies
+			</h2>
+			{isSectionLoading && (
+				<div className="h-[150px] flex justify-center items-center">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						className="icon icon-tabler icon-tabler-loader animate-spin"
+						width={32}
+						height={32}
+						viewBox="0 0 24 24"
+						strokeWidth={2}
+						stroke="#000"
+						fill="none"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
+						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+						<path d="M12 6l0 -3" />
+						<path d="M16.25 7.75l2.15 -2.15" />
+						<path d="M18 12l3 0" />
+						<path d="M16.25 16.25l2.15 2.15" />
+						<path d="M12 18l0 3" />
+						<path d="M7.75 16.25l-2.15 2.15" />
+						<path d="M6 12l-3 0" />
+						<path d="M7.75 7.75l-2.15 -2.15" />
+					</svg>
+				</div>
+			)}
+			{!isSectionLoading && movieCollection && (
+				<article className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+					{movieCollection.map((movie) => {
+						return (
+							<MovieCard
+								movie={movie}
+								key={movie.id}
+								reloadWatchlist={() => reloadWatchlist()}
+							/>
+						);
+					})}
+				</article>
+			)}
+			{!isSectionLoading && !movieCollection && (
+				<div className="h-[150px] flex justify-center items-center">
+					<p className="text-center">No data yet.</p>
+				</div>
+			)}
+		</>
+	);
+};
+
+const RenderTopRatedMovies = ({
+	movieCollection,
+	reloadWatchlist,
+	isSectionLoading,
+}) => {
+	return (
+		<>
+			<h2
+				id="toprated-heading"
+				className="text-2xl sm:text-4xl font-bold"
+			>
+				Top Rated
+			</h2>
+			{isSectionLoading && (
+				<div className="h-[150px] flex justify-center items-center">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						className="icon icon-tabler icon-tabler-loader animate-spin"
+						width={32}
+						height={32}
+						viewBox="0 0 24 24"
+						strokeWidth={2}
+						stroke="#000"
+						fill="none"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
+						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+						<path d="M12 6l0 -3" />
+						<path d="M16.25 7.75l2.15 -2.15" />
+						<path d="M18 12l3 0" />
+						<path d="M16.25 16.25l2.15 2.15" />
+						<path d="M12 18l0 3" />
+						<path d="M7.75 16.25l-2.15 2.15" />
+						<path d="M6 12l-3 0" />
+						<path d="M7.75 7.75l-2.15 -2.15" />
+					</svg>
+				</div>
+			)}
+			{!isSectionLoading && movieCollection && (
+				<article className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+					{movieCollection.map((movie) => {
+						return (
+							<MovieCard
+								movie={movie}
+								key={movie.id}
+								reloadWatchlist={() => reloadWatchlist()}
+							/>
+						);
+					})}
+				</article>
+			)}
+			{!isSectionLoading && !movieCollection && (
+				<div className="h-[150px] flex justify-center items-center">
+					<p className="text-center">No data yet.</p>
+				</div>
+			)}
+		</>
+	);
+};
+
+const RenderUpcomingMovies = ({
+	movieCollection,
+	reloadWatchlist,
+	isSectionLoading,
+}) => {
+	return (
+		<>
+			<h2
+				id="upcoming-heading"
+				className="text-2xl sm:text-4xl font-bold"
+			>
+				Upcoming
+			</h2>
+			{isSectionLoading && (
+				<div className="h-[150px] flex justify-center items-center">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						className="icon icon-tabler icon-tabler-loader animate-spin"
+						width={32}
+						height={32}
+						viewBox="0 0 24 24"
+						strokeWidth={2}
+						stroke="#000"
+						fill="none"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
+						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+						<path d="M12 6l0 -3" />
+						<path d="M16.25 7.75l2.15 -2.15" />
+						<path d="M18 12l3 0" />
+						<path d="M16.25 16.25l2.15 2.15" />
+						<path d="M12 18l0 3" />
+						<path d="M7.75 16.25l-2.15 2.15" />
+						<path d="M6 12l-3 0" />
+						<path d="M7.75 7.75l-2.15 -2.15" />
+					</svg>
+				</div>
+			)}
+			{!isSectionLoading && movieCollection && (
+				<article className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+					{movieCollection.map((movie) => {
+						return (
+							<MovieCard
+								movie={movie}
+								key={movie.id}
+								reloadWatchlist={() => reloadWatchlist()}
+							/>
+						);
+					})}
+				</article>
+			)}
+			{!isSectionLoading && !movieCollection && (
+				<div className="h-[150px] flex justify-center items-center">
+					<p className="text-center">No data yet.</p>
+				</div>
+			)}
+		</>
+	);
+};
+
 function Home() {
 	const [nowPlayingMovies, setNpMovies] = useState();
 	const [popularMovies, setPopularMovies] = useState();
 	const [topRatedMovies, setTopMovies] = useState();
 	const [upcomingMovies, setUpcomingMovies] = useState();
 	const [genres, setGenres] = useState();
+	const [userWatchlist, setUserWatchlist] = useState();
+	const [isPageLoading, setPageLoading] = useState();
+
 	const authData = useLoaderData();
 
 	const getGenres = async () => {
@@ -49,6 +290,7 @@ function Home() {
 	};
 
 	const getMovies = async (category) => {
+		setPageLoading(true);
 		try {
 			const { data } = await tmdb.getMovies(category);
 
@@ -63,38 +305,61 @@ function Home() {
 			if (category === "popular") setPopularMovies(data.results);
 			if (category === "top_rated") setTopMovies(data.results);
 			if (category === "upcoming") setUpcomingMovies(data.results);
+			setPageLoading(false);
 		} catch (e) {
-			throw new Error("Failed to fetch movies: ", e);
+			throw new Error(`Failed to fetch ${category} movies: `, e);
 		}
+	};
+
+	const getWatchlists = () => {
+		const accountId = JSON.parse(sessionStorage.getItem("currentUser")).id;
+		const sessionId = sessionStorage.getItem("currentSession");
+
+		tmdb.getWatchlists(accountId, sessionId)
+			.then((res) => {
+				if (!res.data) {
+					setUserWatchlist(null);
+					return;
+				}
+
+				setUserWatchlist(res.data.results);
+			})
+			.catch((e) => {
+				throw new Error("Failed to get user watchlists: ", e);
+			});
 	};
 
 	const nowPlayingMemo = useMemo(() => {
 		if (nowPlayingMovies && genres) {
-			const result = mapWithGenres(nowPlayingMovies, genres);
+			let result = mapWithGenres(nowPlayingMovies, genres);
+			if (userWatchlist) result = mapWithWatchlist(result, userWatchlist);
 			return result.slice(0, 8);
 		} else return null;
-	}, [nowPlayingMovies, genres]);
+	}, [nowPlayingMovies, genres, userWatchlist]);
 
 	const popularMemo = useMemo(() => {
 		if (popularMovies && genres) {
-			const result = mapWithGenres(popularMovies, genres);
+			let result = mapWithGenres(popularMovies, genres);
+			if (userWatchlist) result = mapWithWatchlist(result, userWatchlist);
 			return result.slice(0, 8);
 		} else return null;
-	}, [popularMovies, genres]);
+	}, [popularMovies, genres, userWatchlist]);
 
 	const topRatedMemo = useMemo(() => {
 		if (topRatedMovies && genres) {
-			const result = mapWithGenres(topRatedMovies, genres);
+			let result = mapWithGenres(topRatedMovies, genres);
+			if (userWatchlist) result = mapWithWatchlist(result, userWatchlist);
 			return result.slice(0, 8);
 		} else return null;
-	}, [topRatedMovies, genres]);
+	}, [topRatedMovies, genres, userWatchlist]);
 
 	const upcomingMemo = useMemo(() => {
 		if (upcomingMovies && genres) {
-			const result = mapWithGenres(upcomingMovies, genres);
+			let result = mapWithGenres(upcomingMovies, genres);
+			if (userWatchlist) result = mapWithWatchlist(result, userWatchlist);
 			return result.slice(0, 8);
 		} else return null;
-	}, [upcomingMovies, genres]);
+	}, [upcomingMovies, genres, userWatchlist]);
 
 	useEffect(() => {
 		if (!sessionStorage.getItem("currentSession")) {
@@ -139,6 +404,7 @@ function Home() {
 			}
 		}
 
+		if (sessionStorage.getItem("currentSession")) getWatchlists();
 		if (!genres) getGenres();
 		if (genres) {
 			getMovies("now_playing");
@@ -161,138 +427,41 @@ function Home() {
 				id="now-playing"
 				className="sm:container p-4 sm:py-4 sm:px-0 mx-auto"
 			>
-				<h2 id="np-heading" className="text-2xl sm:text-4xl font-bold">
-					Now Playing
-				</h2>
-				{nowPlayingMemo && (
-					<article className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-						{nowPlayingMemo.map((movie) => {
-							return (
-								<MovieCard
-									id={movie.id}
-									title={movie.title}
-									genres={movie.genres}
-									poster={movie.poster_path}
-									year={movie.release_date}
-									rating={movie.vote_average}
-									totalRate={movie.vote_count}
-									showBtn
-									key={movie.title}
-								/>
-							);
-						})}
-					</article>
-				)}
-				{!nowPlayingMemo && (
-					<div className="h-[150px] flex justify-center items-center">
-						<p className="text-center">No data yet.</p>
-					</div>
-				)}
+				<RenderNowPlayingMovies
+					movieCollection={nowPlayingMemo}
+					reloadWatchlist={() => getWatchlists()}
+					isSectionLoading={isPageLoading}
+				/>
 			</section>
 			<section
 				id="popular"
 				className="sm:container p-4 sm:py-4 sm:px-0 mx-auto"
 			>
-				<h2
-					id="popular-heading"
-					className="text-2xl sm:text-4xl font-bold"
-				>
-					Popular Movies
-				</h2>
-				{popularMemo && (
-					<article className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-						{popularMemo.map((movie) => {
-							return (
-								<MovieCard
-									id={movie.id}
-									title={movie.title}
-									genres={movie.genres}
-									poster={movie.poster_path}
-									year={movie.release_date}
-									rating={movie.vote_average}
-									totalRate={movie.vote_count}
-									showBtn
-									key={movie.title}
-								/>
-							);
-						})}
-					</article>
-				)}
-				{!popularMemo && (
-					<div className="h-[150px] flex justify-center items-center">
-						<p className="text-center">No data yet.</p>
-					</div>
-				)}
+				<RenderPopularMovies
+					movieCollection={popularMemo}
+					reloadWatchlist={() => getWatchlists()}
+					isSectionLoading={isPageLoading}
+				/>
 			</section>
 			<section
 				id="top-rated"
 				className="sm:container p-4 sm:py-4 sm:px-0 mx-auto"
 			>
-				<h2
-					id="toprated-heading"
-					className="text-2xl sm:text-4xl font-bold"
-				>
-					Top Rated
-				</h2>
-				{topRatedMemo && (
-					<article className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-						{topRatedMemo.map((movie) => {
-							return (
-								<MovieCard
-									id={movie.id}
-									title={movie.title}
-									genres={movie.genres}
-									poster={movie.poster_path}
-									year={movie.release_date}
-									rating={movie.vote_average}
-									totalRate={movie.vote_count}
-									showBtn
-									key={movie.title}
-								/>
-							);
-						})}
-					</article>
-				)}
-				{!topRatedMemo && (
-					<div className="h-[150px] flex justify-center items-center">
-						<p className="text-center">No data yet.</p>
-					</div>
-				)}
+				<RenderTopRatedMovies
+					movieCollection={topRatedMemo}
+					reloadWatchlist={() => getWatchlists()}
+					isSectionLoading={isPageLoading}
+				/>
 			</section>
 			<section
 				id="upcoming"
 				className="sm:container p-4 sm:py-4 sm:px-0 mx-auto"
 			>
-				<h2
-					id="upcoming-heading"
-					className="text-2xl sm:text-4xl font-bold"
-				>
-					Upcoming
-				</h2>
-				{upcomingMemo && (
-					<article className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-						{upcomingMemo.map((movie) => {
-							return (
-								<MovieCard
-									id={movie.id}
-									title={movie.title}
-									genres={movie.genres}
-									poster={movie.poster_path}
-									year={movie.release_date}
-									rating={movie.vote_average}
-									totalRate={movie.vote_count}
-									showBtn
-									key={movie.title}
-								/>
-							);
-						})}
-					</article>
-				)}
-				{!upcomingMemo && (
-					<div className="h-[150px] flex justify-center items-center">
-						<p className="text-center">No data yet.</p>
-					</div>
-				)}
+				<RenderUpcomingMovies
+					movieCollection={upcomingMemo}
+					reloadWatchlist={() => getWatchlists()}
+					isSectionLoading={isPageLoading}
+				/>
 			</section>
 		</>
 	);

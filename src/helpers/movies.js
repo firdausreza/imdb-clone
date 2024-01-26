@@ -4,3 +4,12 @@ export const mapWithGenres = (movies, genres) => {
 		return movie;
 	});
 };
+
+export const mapWithWatchlist = (movies, watchlist) => {
+	return movies.map((movie) => {
+		if (watchlist.some((_movie) => _movie.id === movie.id))
+			movie.watchlist = true;
+		else movie.watchlist = false;
+		return movie;
+	});
+};

@@ -87,4 +87,34 @@ export const tmdb = {
 			},
 		});
 	},
+	getWatchlists: (accountId, sessionId) => {
+		return axios.get(
+			`https://api.themoviedb.org/3/account/${accountId}/watchlist/movies`,
+			{
+				headers: {
+					"Content-Type": "application/json",
+				},
+				params: {
+					api_key: process.env.REACT_APP_TMDB_KEY,
+					session_id: sessionId,
+				},
+			}
+		);
+	},
+	// Payload contain media_id, media_type, watchlist: true/false. this function contain handler for add/remove item
+	requestWatchlist: (accountId, sessionId, payload) => {
+		return axios.post(
+			`https://api.themoviedb.org/3/account/${accountId}/watchlist`,
+			payload,
+			{
+				headers: {
+					"Content-Type": "application/json",
+				},
+				params: {
+					api_key: process.env.REACT_APP_TMDB_KEY,
+					session_id: sessionId,
+				},
+			}
+		);
+	},
 };
