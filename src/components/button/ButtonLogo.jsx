@@ -1,8 +1,16 @@
 import React from "react";
 
-function ButtonLogo({ text, customClass, clickFn, reversed = false, logo }) {
+function ButtonLogo({
+	id,
+	text,
+	customClass,
+	clickFn,
+	reversed = false,
+	logo,
+}) {
 	return (
 		<button
+			id={id}
 			onClick={clickFn}
 			className={`flex items-center ${customClass}`}
 		>

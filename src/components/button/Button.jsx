@@ -1,8 +1,8 @@
 import React from "react";
 
-function Button({ text, customClass, clickFn }) {
+function Button({ id, text, customClass, clickFn }) {
 	return (
-		<button onClick={clickFn} className={customClass}>
+		<button id={id} onClick={clickFn} className={customClass}>
 			{text}
 		</button>
 	);

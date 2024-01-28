@@ -1,15 +1,59 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../../assets/img/imdb-logo.png";
+import localforage from "localforage";
+import { tmdb } from "../../helpers/tmdb-api.js";
 
+import Button from "../button/Button.jsx";
 import "./navbar.css";
 
 function Navbar() {
 	const [expanded, setExpanded] = useState(false);
+	const [onSession, setSession] = useState(false);
+	const [sessionId, setSessionId] = useState("");
+	const [accountId, setAccountId] = useState("");
 
 	const burgerBtnClick = () => {
 		setExpanded((prev) => !prev);
 	};
+
+	const authClick = async () => {
+		if (!onSession) {
+			await tmdb.createReqToken().then((res) => {
+				const token = res.data.request_token;
+				window.location.href = `https://www.themoviedb.org/authenticate/${token}?redirect_to=http://localhost:3000/`;
+			});
+		} else {
+			const sessionId = await localforage
+				.getItem("currentSession")
+				.then((id) => id);
+			await tmdb
+				.deleteSession(sessionId)
+				.then(() => {
+					localforage.removeItem("authStatus");
+					localforage.removeItem("currentSession");
+					localforage.removeItem("currentUser");
+					window.location.href = "/";
+				})
+				.catch((e) => {
+					throw new Error("Failed to delete session: ", e);
+				});
+		}
+	};
+
+	useEffect(() => {
+		localforage.getItem("currentSession").then((value) => {
+			if (value && value !== "") {
+				setSession(true);
+				setSessionId(value);
+			}
+		});
+		localforage.getItem("currentUser").then((user) => {
+			if (user) {
+				setAccountId(JSON.parse(user).id);
+			}
+		});
+	}, []);
 
 	return (
 		<header className="bg-stone-950">
@@ -43,6 +87,15 @@ function Navbar() {
 						>
 							My Watchlists
 						</Link>
+						<Button
+							clickFn={() => authClick()}
+							customClass={`px-4 py-2 rounded-md ${
+								onSession
+									? "bg-red-500 text-white"
+									: "bg-yellow-500"
+							}`}
+							text={onSession ? "Disconnect" : "Authenticate"}
+						/>
 					</div>
 				</div>
 				{expanded && (
@@ -59,6 +112,15 @@ function Navbar() {
 						>
 							My Watchlists
 						</Link>
+						<Button
+							clickFn={() => authClick()}
+							customClass={`px-2 py-1 rounded-md text-sm ${
+								onSession
+									? "bg-red-500 text-white"
+									: "bg-yellow-500"
+							}`}
+							text={onSession ? "Disconnect" : "Authenticate"}
+						/>
 					</div>
 				)}
 			</nav>
