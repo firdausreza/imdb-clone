@@ -117,4 +117,19 @@ export const tmdb = {
 			}
 		);
 	},
+	requestRating: (movieId, sessionId, payload) => {
+		return axios.post(
+			`https://api.themoviedb.org/3/movie/${movieId}/rating`,
+			payload,
+			{
+				headers: {
+					"Content-Type": "application/json",
+				},
+				params: {
+					api_key: process.env.REACT_APP_TMDB_KEY,
+					session_id: sessionId,
+				},
+			}
+		);
+	},
 };

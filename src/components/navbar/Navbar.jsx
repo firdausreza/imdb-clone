@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../../assets/img/imdb-logo.png";
-
-import "./navbar.css";
-import Button from "../button/Button.jsx";
+import localforage from "localforage";
 import { tmdb } from "../../helpers/tmdb-api.js";
+
+import Button from "../button/Button.jsx";
+import "./navbar.css";
 
 function Navbar() {
 	const [expanded, setExpanded] = useState(false);
 	const [onSession, setSession] = useState(false);
+	const [sessionId, setSessionId] = useState("");
+	const [accountId, setAccountId] = useState("");
 
 	const burgerBtnClick = () => {
 		setExpanded((prev) => !prev);
@@ -21,12 +24,15 @@ function Navbar() {
 				window.location.href = `https://www.themoviedb.org/authenticate/${token}?redirect_to=http://localhost:3000/`;
 			});
 		} else {
+			const sessionId = await localforage
+				.getItem("currentSession")
+				.then((id) => id);
 			await tmdb
-				.deleteSession(sessionStorage.getItem("currentSession"))
+				.deleteSession(sessionId)
 				.then(() => {
-					sessionStorage.removeItem("authStatus");
-					sessionStorage.removeItem("currentSession");
-					sessionStorage.removeItem("currentUser");
+					localforage.removeItem("authStatus");
+					localforage.removeItem("currentSession");
+					localforage.removeItem("currentUser");
 					window.location.href = "/";
 				})
 				.catch((e) => {
@@ -36,9 +42,17 @@ function Navbar() {
 	};
 
 	useEffect(() => {
-		if (sessionStorage.getItem("currentSession")) {
-			setSession(true);
-		}
+		localforage.getItem("currentSession").then((value) => {
+			if (value && value !== "") {
+				setSession(true);
+				setSessionId(value);
+			}
+		});
+		localforage.getItem("currentUser").then((user) => {
+			if (user) {
+				setAccountId(JSON.parse(user).id);
+			}
+		});
 	}, []);
 
 	return (

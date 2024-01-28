@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import MovieCard from "../../components/movie-card/MovieCard.jsx";
 import { tmdb } from "../../helpers/tmdb-api.js";
+import localforage from "localforage";
+import Offline from "../../components/offline/Offline.jsx";
 
 function Watchlists() {
 	const [myWatchlist, setMyWatchlist] = useState();
 	const [isPageLoading, setPageLoading] = useState(false);
+	const [sessionId, setSessionId] = useState();
+	const [accountId, setAccountId] = useState();
 
 	const getWatchlists = () => {
 		setPageLoading(true);
-		const accountId = JSON.parse(sessionStorage.getItem("currentUser")).id;
-		const sessionId = sessionStorage.getItem("currentSession");
 
 		tmdb.getWatchlists(accountId, sessionId).then((res) => {
 			if (!res.data) {
@@ -30,16 +32,32 @@ function Watchlists() {
 	};
 
 	useEffect(() => {
-		if (!sessionStorage.getItem("currentSession")) {
-			setMyWatchlist(null);
-			return;
+		document.title = "IMDb Clone - My Watchlists";
+		try {
+			localforage.getItem("currentSession").then((value) => {
+				if (value && value !== "") {
+					setSessionId(value);
+				}
+			});
+			localforage.getItem("currentUser").then((user) => {
+				if (user) {
+					setAccountId(JSON.parse(user).id);
+				}
+			});
+		} catch (err) {
+			throw new Error("Failed to fetch localforage item: ", err);
+		} finally {
+			if (sessionId && sessionId !== "") {
+				getWatchlists();
+			} else {
+				setMyWatchlist(null);
+			}
 		}
-
-		getWatchlists();
-	}, []);
+	}, [sessionId]);
 
 	return (
 		<>
+			<Offline />
 			<section className="min-h-[80vh]">
 				<section
 					id="hero"

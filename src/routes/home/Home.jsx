@@ -4,6 +4,8 @@ import { useLoaderData } from "react-router-dom";
 import MovieCard from "../../components/movie-card/MovieCard.jsx";
 import { tmdb } from "../../helpers/tmdb-api.js";
 import { mapWithGenres, mapWithWatchlist } from "../../helpers/movies.js";
+import localforage from "localforage";
+import Offline from "../../components/offline/Offline.jsx";
 
 export async function loader({ request }) {
 	const url = new URL(request.url);
@@ -270,6 +272,8 @@ function Home() {
 	const [genres, setGenres] = useState();
 	const [userWatchlist, setUserWatchlist] = useState();
 	const [isPageLoading, setPageLoading] = useState();
+	const [sessionId, setSessionId] = useState();
+	const [accountId, setAccountId] = useState();
 
 	const authData = useLoaderData();
 
@@ -311,10 +315,7 @@ function Home() {
 		}
 	};
 
-	const getWatchlists = () => {
-		const accountId = JSON.parse(sessionStorage.getItem("currentUser")).id;
-		const sessionId = sessionStorage.getItem("currentSession");
-
+	const getWatchlists = async () => {
 		tmdb.getWatchlists(accountId, sessionId)
 			.then((res) => {
 				if (!res.data) {
@@ -362,60 +363,78 @@ function Home() {
 	}, [upcomingMovies, genres, userWatchlist]);
 
 	useEffect(() => {
-		if (!sessionStorage.getItem("currentSession")) {
-			if (
-				authData.status === "authenticated" &&
-				authData.request_token !== "" &&
-				authData.approved
-			) {
-				sessionStorage.setItem("authStatus", JSON.stringify(authData));
-				tmdb.createSession(authData.request_token)
-					.then((res) => {
-						if (res.data) {
-							sessionStorage.setItem(
-								"currentSession",
-								res.data.session_id
-							);
-							tmdb.getAccountDetails(res.data.session_id)
-								.then((_res) => {
-									if (res.data) {
-										sessionStorage.setItem(
-											"currentUser",
-											JSON.stringify({
-												name: _res.data.name,
-												username: _res.data.username,
-												id: _res.data.id,
-											})
+		try {
+			localforage.getItem("currentSession").then((value) => {
+				if (value && value !== "") {
+					setSessionId(value);
+				}
+			});
+			localforage.getItem("currentUser").then((user) => {
+				if (user) {
+					setAccountId(JSON.parse(user).id);
+				}
+			});
+		} catch (err) {
+			throw new Error("Failed to fetch localforage item: ", err);
+		} finally {
+			if (!sessionId) {
+				if (
+					authData.status === "authenticated" &&
+					authData.request_token !== "" &&
+					authData.approved
+				) {
+					localforage.setItem("authStatus", JSON.stringify(authData));
+					tmdb.createSession(authData.request_token)
+						.then((res) => {
+							if (res.data) {
+								localforage.setItem(
+									"currentSession",
+									res.data.session_id
+								);
+								tmdb.getAccountDetails(res.data.session_id)
+									.then((_res) => {
+										if (res.data) {
+											localforage.setItem(
+												"currentUser",
+												JSON.stringify({
+													name: _res.data.name,
+													username:
+														_res.data.username,
+													id: _res.data.id,
+												})
+											);
+										}
+									})
+									.then(() => (window.location.href = "/"))
+									.catch((e) => {
+										throw new Error(
+											"Failed to get account details: ",
+											e
 										);
-									}
-								})
-								.then(() => window.location.reload())
-								.catch((e) => {
-									throw new Error(
-										"Failed to get account details: ",
-										e
-									);
-								});
-						}
-					})
-					.catch((e) => {
-						throw new Error("Failed to createSession: ", e);
-					});
+									});
+							}
+						})
+						.catch((e) => {
+							throw new Error("Failed to createSession: ", e);
+						});
+				}
+			}
+			if (sessionId) {
+				getWatchlists();
+			}
+			if (!genres) getGenres();
+			if (genres) {
+				getMovies("now_playing");
+				getMovies("popular");
+				getMovies("top_rated");
+				getMovies("upcoming");
 			}
 		}
-
-		if (sessionStorage.getItem("currentSession")) getWatchlists();
-		if (!genres) getGenres();
-		if (genres) {
-			getMovies("now_playing");
-			getMovies("popular");
-			getMovies("top_rated");
-			getMovies("upcoming");
-		}
-	}, [genres, authData]);
+	}, [genres, authData, sessionId]);
 
 	return (
 		<>
+			<Offline />
 			<section
 				id="hero"
 				className="sm:container p-4 sm:py-12 sm:px-0 mx-auto"

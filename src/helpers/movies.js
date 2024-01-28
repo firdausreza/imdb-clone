@@ -5,6 +5,7 @@ export const mapWithGenres = (movies, genres) => {
 	});
 };
 
+// Movies: Array, Watchlist: Array
 export const mapWithWatchlist = (movies, watchlist) => {
 	return movies.map((movie) => {
 		if (watchlist.some((_movie) => _movie.id === movie.id))

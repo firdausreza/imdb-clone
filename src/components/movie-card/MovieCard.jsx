@@ -1,38 +1,37 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import numeral from "numeral";
+import { saveWatchlist } from "../../helpers/dataHandler.js";
+import localforage from "localforage";
 
 import ButtonLogo from "../button/ButtonLogo.jsx";
-import { tmdb } from "../../helpers/tmdb-api.js";
 
 function MovieCard({ movie, reloadWatchlist }) {
 	const [isLoading, setLoading] = useState();
 	const _year = new Date(movie.release_date).getFullYear();
 
-	const toggleWatchlist = async () => {
-		if (sessionStorage.getItem("currentSession")) {
+	const handleReqWatchlist = async () => {
+		const sessionId = await localforage.getItem("currentSession");
+		if (sessionId) {
 			setLoading(true);
-			const accountId = JSON.parse(
-				sessionStorage.getItem("currentUser")
-			).id;
-			const sessionId = sessionStorage.getItem("currentSession");
+			const accountId =
+				JSON.parse(await localforage.getItem("currentUser")).id || 0;
+			const payload = {
+				account_id: accountId,
+				data: [
+					{
+						media_id: movie.id,
+						media_type: "movie",
+						watchlist: !movie.watchlist,
+					},
+				],
+			};
 
-			await tmdb
-				.requestWatchlist(accountId, sessionId, {
-					media_id: movie.id,
-					media_type: "movie",
-					watchlist: !movie.watchlist,
-				})
-				.then((res) => {
-					if (res.data) {
-						movie.watchlist = !movie.watchlist;
-						reloadWatchlist();
-					}
-				})
-				.then(() => setLoading(false))
-				.catch((e) => {
-					throw new Error("Failed to add watchlist: ", e);
-				});
+			saveWatchlist(payload, sessionId).then(() => {
+				movie.watchlist = !movie.watchlist;
+				if (navigator.onLine) reloadWatchlist();
+				setLoading(false);
+			});
 		}
 	};
 
@@ -120,7 +119,8 @@ function MovieCard({ movie, reloadWatchlist }) {
 				</p>
 				{!isLoading && (
 					<ButtonLogo
-						clickFn={() => toggleWatchlist()}
+						id="toggleWatchlist"
+						clickFn={() => handleReqWatchlist()}
 						customClass={`w-max text-xs text-center font-semibold px-2 py-1 rounded-md mt-4 ${
 							movie.watchlist
 								? "bg-red-500 text-white"
